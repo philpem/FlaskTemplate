@@ -2,10 +2,12 @@ from sqlalchemy import Column, ForeignKey, Sequence
 from sqlalchemy import Integer, String, Text, Enum
 from sqlalchemy.orm import relationship, backref
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import bcrypt
 from .app import app
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Category
 class Category(db.Model):
