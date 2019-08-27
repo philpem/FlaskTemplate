@@ -8,9 +8,11 @@ To use this:
 - Initialise flask-migrate: `flask db init`
 - Add the new `migrations` folder to git
 - Create an initial migration: `flask db migrate`
-- Apply the migration to the database: `flask db migrate`
+- Apply the migration to the database: `flask db upgrade`
 
-Every time the database models change, repeat the `migrate` and `upgrade` commands.
+Every time the database models change, repeat the `migrate` and `upgrade` commands. You should review the migration script manually as it will not detect table or column name changes, or anonymously named constraints. See the [https://flask-migrate.readthedocs.io/en/latest/](Flask-Migrate documentation) for more information.
+
+From this point on, user installation should only require the `flask db upgrade` step be run. This will initialise the database automatically.
 
 For more information on flask-migrate, see https://flask-migrate.readthedocs.io/en/latest/ .
 
