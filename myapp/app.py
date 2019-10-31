@@ -14,12 +14,11 @@ class AppClass(Flask):
 	def __init__(self, *args, **kwargs):
 		# Let Flask initialise itself
 		super(AppClass, self).__init__(*args, **kwargs)
-		# Now create an empty menu object and set up the context processor
-		self._myapp_menudata = None
+		# Create an empty menu list
+		self._myapp_menudata = list()
 
 	def add_menu_item(self, label, endpoint, sortorder=0):
-		if self._myapp_menudata is None:
-			self._myapp_menudata = list()
+		""" Add a menu item to the application menu """
 		self._myapp_menudata.append(dict(label=label, endpoint=endpoint, sortorder=sortorder))
 
 # create and configure the application
