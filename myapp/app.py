@@ -4,8 +4,8 @@ from flask import Flask, render_template, redirect, request, url_for, flash, g
 from flask_login import (LoginManager, current_user, login_required,
 		login_user, logout_user, confirm_login, fresh_login_required)
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, SubmitField, TextField
-from wtforms.validators import Required
+from wtforms import PasswordField, SubmitField, StringField
+from wtforms.validators import DataRequired
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import os
 
@@ -111,8 +111,8 @@ def load_user(userid):
 @app.route("/login", methods=["GET","POST"])
 def login():
 	class LoginForm(FlaskForm):
-		username=TextField("Username", validators=[Required()])
-		password=PasswordField("Password", validators=[Required()])
+		username=StringField("Username", validators=[DataRequired()])
+		password=PasswordField("Password", validators=[DataRequired()])
 		submit=SubmitField("Log in")
 
 	form = LoginForm()

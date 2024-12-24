@@ -25,7 +25,7 @@
 			</label>
 		</div>
 	{%- else %}
-		{% if field.type in ('TextField', 'TextAreaField', 'PasswordField') %}
+		{% if field.type in ('StringField', 'TextAreaField', 'PasswordField') %}
 			{% set class_ = class_ + ' input-xlarge form-control' %}
 		{% elif field.type == 'FileField' %}
 			{% set class_ = class_ + ' input-file form-control' %}

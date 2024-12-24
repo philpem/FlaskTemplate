@@ -2,7 +2,8 @@ from flask import Blueprint, render_template
 from flask_login import current_user, login_required
 from ..app import app
 
-blueprint = Blueprint(__name__, __name__,
+print(__name__)
+blueprint = Blueprint(__name__.split('.')[-1], __name__,
 		template_folder='templates')
 
 # TODO only add menu item if logged in
