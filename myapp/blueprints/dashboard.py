@@ -2,12 +2,13 @@ from flask import Blueprint, render_template
 from flask_login import current_user, login_required
 from ..app import app
 
-print(__name__)
-blueprint = Blueprint(__name__.split('.')[-1], __name__,
+ROUTENAME = __name__.split('.')[-1]
+
+blueprint = Blueprint(ROUTENAME, __name__,
 		template_folder='templates')
 
 # TODO only add menu item if logged in
-app.add_menu_item("Dashboard", "%s.dashboard" % __name__, -1000)
+app.add_menu_item("Dashboard", f"{ROUTENAME}.dashboard", -1000)
 
 # -- dashboard --
 #@blueprint.route("/")
