@@ -1,7 +1,7 @@
 import os
 from .app import app
 
-from .blueprints import dashboard
+from .blueprints import index
 
 def load_blueprints():
 	""" Load all the blueprints (modules or .py files) in a specified directory and its subdirectories.

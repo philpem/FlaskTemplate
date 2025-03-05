@@ -119,7 +119,7 @@ class User(db.Model):
 	def checkPassword(self, password):
 		# Use Bcrypt to verify the password
 		try:
-			return (bcrypt.hashpw(password.encode('utf-8'), self.password_hash.encode('utf-8')) == self.password_hash.encode('utf-8'))
+			return bcrypt.checkpw(password.encode('utf-8'), self.password_hash)
 		except:
 			# Bcrypt throws a ValueError if the salt is invalid (wrong password format)
 			# In which case it's a fair bet the account is locked or has been mucked around with.

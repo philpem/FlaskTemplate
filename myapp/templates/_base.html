@@ -1,37 +1,36 @@
+{% from 'bootstrap5/nav.html' import render_nav_item %}
+{% from 'bootstrap5/utils.html' import render_messages %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>{% block page_title %}{% endblock %} :: Registration Panel</title>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
-		<!-- Custom styles for this template -->
-		<link href="{{ url_for('static', filename='theme.css') }}" rel="stylesheet">
+		<title>{% block page_title %}{% endblock %} :: MyExampleFlaskApp</title>
+
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            {{ bootstrap.load_css() }}
+        {% endblock %}
 	</head>
 	<body>
 		<!-- Fixed navbar -->
-		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" role="navigation">
 			<div class="container">
 				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+					aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
 					</button>
-{% if current_user.is_authenticated %}
-					<a class="navbar-brand" href="{{ url_for('archivist.blueprints.index.index') }}">Dashboard (logged in)</a>
-{% else %}
-					<span class="navbar-brand">Dashboard (logged out)</span>
-{% endif %}
+
+					<a class="navbar-brand" href="{{ url_for('myapp_blueprints_index.index') }}">MyExampleFlaskApp</a>
 				</div>
-				<div class="navbar-collapse collapse">
-					<ul class="nav navbar-nav">
+				<div class="collapse navbar-collapse">
+					<ul class="navbar-nav">
 {% if current_user.is_authenticated %}{% with menuitems = menu %}{%- for menuitem in menuitems %}
-						<li{% if menuitem.endpoint == request.endpoint %} class="active"{% endif %}><a href="{{ url_for(menuitem.endpoint) }}">{{ menuitem.label }}</a></li>{%- endfor %}
+						<li{% if menuitem.endpoint == request.endpoint %} class="nav-item"{% endif %}><a class="nav-link active" aria-current="page" href="{{ url_for(menuitem.endpoint) }}">{{ menuitem.label }}</a></li>{%- endfor %}
 {% endwith %}{% endif %}
 <!--
 						<li class="active"><a href="#">Home</a></li>
@@ -53,48 +52,35 @@
 					</ul>
 
 {% if current_user.is_authenticated %}
-					<ul class="nav navbar-nav navbar-right">
+					<ul class="navbar-nav ms-auto">
 						<!-- TODO - dropdown: User CP, sep, Log Out -->
-						<li><a href="#FIXMEusercp" title="User settings">{{ current_user.username }} <b class="glyphicon glyphicon-user"></b></a></li>
-						<li><a href="{{ url_for('logout') }}" title="Log out"><b class="glyphicon glyphicon-log-out"></b></a></li>
+						<li class="nav-item"><a class="nav-link" href="#FIXMEusercp" title="User settings">{{ current_user.username }} <b class="glyphicon glyphicon-user"></b></a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}" title="Log out"><b class="glyphicon glyphicon-log-out"></b>Logout</a></li>
 					</ul>
 {% else %}
-					<p class="nav navbar-text navbar-right">Not logged in</p>
+					<p class="nav navbar-text me-auto">Not logged in</p>
 {% endif %}
 
 				</div><!--/.nav-collapse -->
 			</div>
 		</div>
 
-		<div class="container">
-{% with messages = get_flashed_messages(with_categories=true) %}
-	{% for category, message in messages %}
-		{% if category.lower() == 'error' %}
-			<div class="alert alert-danger"><b>Error:</b> {{ message }}</div>
-		{% elif category.lower() == 'warning' %}
-			<div class="alert alert-warning"><b>Warning:</b> {{message}}</div>
-		{% elif category.lower() == 'success' %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{message}}
-			</div>
-		{% else %}
-			<div class="alert alert-info alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<strong>Information:</strong> {{message}}
-			</div>
-		{% endif %}
-	{% endfor %}
-{% endwith %}
+		<main class="container">
+			{{ render_messages(container=False, dismissible=True, dismiss_animate=True) }}
+			{% block content %}{% endblock %}
+		</main>
 
-{% block content %}
-{% endblock %}
-		</div>
+		<footer class="text-center">
+			{% block footer %}
+				<small> &copy; 2024–<script>document.write(new Date().getFullYear())</script> <a href="https://github.com/philpem">Phil Pemberton</a>
+				</small>
+			{% endblock %}
+		</footer>
 
-		<!-- TODO: Footer: copyright message, version info... -->
-
-		<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+        {% block scripts %}
+            <!-- Optional JavaScript -->
+            {{ bootstrap.load_js() }}
+        {% endblock %}
 	</body>
 </html>
 

@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from flask_bootstrap import Bootstrap5
 from flask import Flask, render_template, redirect, request, url_for, flash, g
 from flask_login import (LoginManager, current_user, login_required,
 		login_user, logout_user, confirm_login, fresh_login_required)
@@ -24,6 +25,8 @@ class AppClass(Flask):
 # create and configure the application
 app = AppClass(__name__)
 app.config.from_pyfile('myapp.cfg')
+
+bootstrap = Bootstrap5(app)
 
 # provide a link to the application for gunicorn
 application = app
@@ -131,7 +134,7 @@ def login():
 			if userrec.checkPassword(form.password.data):
 				login_user(userrec)
 				#flash("Logged in successfully", "success")
-				return redirect(request.args.get("next") or url_for("myapp.blueprints.index.index"))
+				return redirect(request.args.get("next") or url_for("myapp_blueprints_index.index"))
 
 	if request.method == 'POST':
 		flash("Error logging in - please check your username and password and ensure that CAPS LOCK is turned off.", "error")

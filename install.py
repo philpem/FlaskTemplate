@@ -4,19 +4,19 @@
 
 from flask import Flask
 from myapp.database import db, User
+from myapp.app import app
 import sys
 
 if __name__ == '__main__':
 	# quickly check that the user hasn't left the secret key at the default setting
 	# Create a Flask instance so we can access the application configuration
-	app = Flask(__name__)
-	app.config.from_pyfile('myapp/myapp.cfg')
 	if app.config['SECRET_KEY'] == "0123456789ABCDEF":
 		print("Secret key has not been set!")
 		print("Please read the installation instructions.")
 		sys.exit(1)
 
 	# initialise the database
+	app.app_context().push()
 	db.create_all()
 
 	# Create an 'admin' user (but only if one does not exist already)

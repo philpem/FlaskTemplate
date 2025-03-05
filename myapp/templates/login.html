@@ -1,5 +1,5 @@
 {% extends "_base.html" %}
-{% from "_wtf.html" import render_field %}
+{% from 'bootstrap5/form.html' import render_form %}
 
 {% block page_title %}Log in{% endblock %}
 
@@ -8,9 +8,7 @@
 		{{ form.hidden_tag() }}
 		<h2 class="form-signin-heading">Please log in</h2>
 
-		{{ render_field(form.username, autofocus=True) }}
-		{{ render_field(form.password) }}
-		{{ render_field(form.submit, class_="btn btn-lg btn-primary btn-block") }}
+		{{ render_form(form) }}
 	</form>
 
 {% endblock %}
