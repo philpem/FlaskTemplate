@@ -16,6 +16,25 @@ From this point on, user installation should only require the `flask db upgrade`
 
 For more information on flask-migrate, see https://flask-migrate.readthedocs.io/en/latest/ .
 
+
+## Things you might want to do...
+
+### Rename the 'myapp' directory
+
+This needs to be changed in several places:
+
+  - `Dentrypoint.sh`
+  - `Dockerfile`
+  - `app_venv.wsgi`
+  - `instal.py`
+  - `myapp/app.py`
+  - `myapp/templates/_base.html`
+
+### Change the name of the application, 'MyExampleFlaskApp'
+
+This is in only one place: `myapp/templates/_base.html`.
+
 ## TODO:
 
 - The Docker bootstrap code isn't ideal (especially database initialisation). Ideally look at Dockerfiles for other web apps and improve this.
+
