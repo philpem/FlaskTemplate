@@ -12,7 +12,7 @@ class User(db.Model):
 	__tablename__ = 'user'
 	id				= Column(Integer, Sequence('user_id_seq'), primary_key=True)
 	username		= Column(String(50), nullable=False, unique=True)
-	password_hash	= Column(String(60), nullable=False)
+	password_hash	= Column(String(72), nullable=False)
 
 	def is_authenticated(self):
 		return True
@@ -35,7 +35,7 @@ class User(db.Model):
 		# Use Bcrypt to verify the password
 		try:
 			return bcrypt.checkpw(password.encode('utf-8'), self.password_hash)
-		except:
+		except (ValueError, TypeError):
 			# Bcrypt throws a ValueError if the salt is invalid (wrong password format)
 			# In which case it's a fair bet the account is locked or has been mucked around with.
 			return False
