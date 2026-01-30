@@ -56,7 +56,7 @@ def create_app(config_name=None):
 		app.logger.warning('Warning - database profiling enabled. Do not use this in production!')
 		try:
 			import sqltap
-		except:
+		except ImportError:
 			app.logger.error('Cannot import sqltap. Install it with pip to use profiling!')
 			raise
 
