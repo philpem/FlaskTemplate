@@ -37,7 +37,7 @@ This needs to be changed in several places:
   - `Dentrypoint.sh`
   - `Dockerfile`
   - `app_venv.wsgi`
-  - `instal.py`
+  - `install.py`
   - `myapp/app.py`
   - `myapp/templates/_base.html`
 
