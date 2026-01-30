@@ -9,6 +9,7 @@ from wtforms import PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import os
+import secrets
 
 from .extensions import db, migrate, login_manager, bootstrap
 
