@@ -122,7 +122,7 @@ def _register_blueprints(app):
 				module.init_app(app)
 
 		except Exception as e:
-			app.logger.error(f"Failed to load blueprint {modname}: {e}")
+			app.logger.error(f"Failed to load blueprint {modname}: {e}", exc_info=True)
 			continue
 
 def _register_login_handlers(app):
