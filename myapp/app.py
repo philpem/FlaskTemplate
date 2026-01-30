@@ -210,6 +210,8 @@ def _register_error_handlers(app):
 
 	@app.errorhandler(500)
 	def internal_error(e):
+		# roll back any partially-completed database transactions first
+		db.session.rollback()
 		return render_template('errors/500.html'), 500
 
 
