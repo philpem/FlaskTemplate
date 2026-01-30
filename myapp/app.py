@@ -10,6 +10,8 @@ from wtforms.validators import DataRequired
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import os
 
+from .extensions import db, migrate, login_manager, bootstrap
+
 # Subclass the application so we can add the menu management functions
 class AppClass(Flask):
 	def __init__(self, *args, **kwargs):
@@ -22,45 +24,87 @@ class AppClass(Flask):
 		""" Add a menu item to the application menu """
 		self._myapp_menudata.append(dict(label=label, endpoint=endpoint, sortorder=sortorder))
 
-# create and configure the application
-app = AppClass(__name__)
-app.config.from_pyfile('myapp.cfg')
+def create_app(config_name=None):
+	# create and configure the application
+	app = AppClass(__name__)
+	app.config.from_pyfile(config_name or 'myapp.cfg')
 
-bootstrap = Bootstrap5(app)
+	# Initialise extensions
+	db.init_app(app)
+	migrate.init_app(app, db)
+	login_manager.init_app(app)
+	bootstrap.init_app(app)
 
+	# Flask-Login configuration
+	login_manager.login_view = 'login'
+	login_manager.login_message = u'Please log in to access this page.'
+
+	# tell jinja to remove extraneous whitespace
+	app.jinja_env.trim_blocks = True
+	app.jinja_env.lstrip_blocks = True
+
+	# enable database logging (if enabled)
+	if app.config.get('DEBUG_DB_LOG', False):
+		from flask.logging import default_handler
+		import logging
+		app.logger.warning('Warning - database logging enabled. This will spam the logs!')
+		logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+		logging.getLogger('sqlalchemy.engine').addHandler(default_handler)
+
+	# start database profiling (if enabled)
+	if app.config.get('DEBUG_DB_PROFILING', False):
+		app.logger.warning('Warning - database profiling enabled. Do not use this in production!')
+		try:
+			import sqltap
+		except:
+			app.logger.error('Cannot import sqltap. Install it with pip to use profiling!')
+			raise
+
+		def context_fn(*args):
+			import uuid
+			try:
+				return g.req_id
+			except AttributeError:
+				g.req_id = uuid.uuid4().hex
+				return g.req_id
+
+		sqltap_sess = sqltap.start(user_context_fn = context_fn)
+
+	# Register blueprints
+	_register_blueprints(app)
+
+	return app
+
+
+def _register_blueprints(app):
+	""" Load and register all blueprints from the 'blueprints' directory. """
+	import pkgutil
+	from . import blueprints
+
+	for importer,modname,ispkg in pkgutil.iter_modules(blueprints.__path__):
+		try:
+			module = __import__(f"myapp.blueprints.{modname}", fromlist=[modname])
+			if hasattr(module, 'blueprint'):
+				app.register_blueprint(module.blueprint)
+				app.logger.info(f"Registered blueprint: {modname}")
+			else:
+				app.logger.warning(f"Module {modname} has no 'blueprint' attribute")
+
+			# call init_app if the module provides it
+			if hasattr(module, 'init_app'):
+				module.init_app(app)
+
+		except Exception as e:
+			app.logger.error(f"Failed to load blueprint {modname}: {e}")
+			continue
+
+
+# create the application
+app = create_app()
 # provide a link to the application for gunicorn
 application = app
 
-# tell jinja to remove extraneous whitespace
-app.jinja_env.trim_blocks = True
-app.jinja_env.lstrip_blocks = True
 
-# enable database logging (if enabled)
-if app.config.get('DEBUG_DB_LOG', False):
-	from flask.logging import default_handler
-	import logging
-	app.logger.warning('Warning - database logging enabled. This will spam the logs!')
-	logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-	logging.getLogger('sqlalchemy.engine').addHandler(default_handler)
-
-# start database profiling (if enabled)
-if app.config.get('DEBUG_DB_PROFILING', False):
-	app.logger.warning('Warning - database profiling enabled. Do not use this in production!')
-	try:
-		import sqltap
-	except:
-		app.logger.error('Cannot import sqltap. Install it with pip to use profiling!')
-		raise
-
-	def context_fn(*args):
-		import uuid
-		try:
-			return g.req_id
-		except AttributeError:
-			g.req_id = uuid.uuid4().hex
-			return g.req_id
-
-	sqltap_sess = sqltap.start(user_context_fn = context_fn)
 
 # -- main menu handing (context processor) --
 @app.context_processor
@@ -83,16 +127,12 @@ def shutdown_session(exception=None):
 		stats_req = list(filter(lambda x: x.user_context == g.req_id, sqltap_sess.collect()))
 		sqltap.report(stats_all, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_all.html"))
 		sqltap.report(stats_req, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_req.html"))
+	# close the database session
+	db.session.remove()
 
 # -- login management --
 
 from .database import User
-
-# Flask-Login configuration
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.login_message = u'Please log in to access this page.'
 
 # TODO -- For 'fresh_login_required' to work, we need a "reauthenticate" handler.
 #   See https://github.com/maxcountryman/flask-login/blob/master/example/login-example.py for a code example
@@ -146,5 +186,19 @@ def logout():
 	logout_user()
 	flash("You have now been logged out.", "info")
 	return redirect(url_for("login"))
+
+"""
+###########
+# error page handling
+###########
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('errors/500.html'), 500
+"""
 
 # vim: ts=4 sw=4 noet
