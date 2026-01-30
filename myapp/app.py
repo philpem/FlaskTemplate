@@ -68,6 +68,17 @@ def create_app(config_name=None):
 				g.req_id = uuid.uuid4().hex
 				return g.req_id
 
+		# -- post-request teardown --
+		@app.teardown_request
+		def shutdown_session(exception=None):
+			# if database profiling is enabled, save a report
+			if app.config.get('DEBUG_DB_PROFILING', False) and not request.path.startswith('/static'):
+				# filter out any statistics which aren't for this request
+				stats_all = sqltap_sess.collect()
+				stats_req = list(filter(lambda x: x.user_context == g.req_id, sqltap_sess.collect()))
+				sqltap.report(stats_all, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_all.html"))
+				sqltap.report(stats_req, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_req.html"))
+
 		sqltap_sess = sqltap.start(user_context_fn = context_fn)
 
 	# -- main menu handing (context processor) --
@@ -80,20 +91,6 @@ def create_app(config_name=None):
 		"""
 		return dict(menu=sorted(app._myapp_menudata,
 								key=lambda mi: (mi['sortorder'], mi['label'].lower())))
-
-
-	# -- post-request teardown --
-	@app.teardown_request
-	def shutdown_session(exception=None):
-		# if database profiling is enabled, save a report
-		if app.config.get('DEBUG_DB_PROFILING', False) and not request.path.startswith('/static'):
-			# filter out any statistics which aren't for this request
-			stats_all = sqltap_sess.collect()
-			stats_req = list(filter(lambda x: x.user_context == g.req_id, sqltap_sess.collect()))
-			sqltap.report(stats_all, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_all.html"))
-			sqltap.report(stats_req, os.path.join(os.path.dirname(os.path.realpath(__file__)), "static/db_profile_report_req.html"))
-		# close the database session
-		db.session.remove()
 
 	# Register login handlers, error handlers and blueprints
 	_register_login_handlers(app)
